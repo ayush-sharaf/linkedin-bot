@@ -1,24 +1,24 @@
-username: ayushsharaf0011@gmail.com
-password: ayush0011
-phone_number: '7898800615'
+username: 'your email address'
+password: 'your password'
+phone_number:  'your phone number'
 
 profile_path: '' #can be empty, will default to 'C:\Users\<user>\AppData\Local\Google\Chrome\User Data\Default'
 
 
 positions:
-- Software Engineer
+- 'postion you want to apply'
 
 
 locations:
-- Michigan
+- 'location'
 - Remote
 
-salary: 60,000
+salary: 'expected salary'
 rate: 25
 # --------- Optional Parameters -------
 uploads:
-  Resume: /Users/ayushsharaf/Desktop/LinkedIn-Easy-Apply-Bot/cv.pdf
-  Cover Letter: cl.pdf
+  Resume: 'definite path to your resume'
+  Cover Letter: 'definite path to your cover letter'
   #Photo: # PATH TO photo
 
 
