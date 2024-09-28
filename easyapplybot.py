@@ -25,8 +25,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from selenium.webdriver.chrome.service import Service as ChromeService
-import webdriver_manager.chrome as ChromeDriverManager
-ChromeDriverManager = ChromeDriverManager.ChromeDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 log = logging.getLogger(__name__)
@@ -423,116 +422,83 @@ class EasyApplyBot:
 
     def send_resume(self) -> bool:
         def is_present(button_locator) -> bool:
-            return len(self.browser.find_elements(button_locator[0],
-                                                  button_locator[1])) > 0
+            return len(self.browser.find_elements(button_locator[0], button_locator[1])) > 0
 
         try:
-            #time.sleep(random.uniform(1.5, 2.5))
-            next_locator = (By.CSS_SELECTOR,
-                            "button[aria-label='Continue to next step']")
-            review_locator = (By.CSS_SELECTOR,
-                              "button[aria-label='Review your application']")
-            submit_locator = (By.CSS_SELECTOR,
-                              "button[aria-label='Submit application']")
-            error_locator = (By.CLASS_NAME,"artdeco-inline-feedback__message")
+            next_locator = (By.CSS_SELECTOR, "button[aria-label='Continue to next step']")
+            review_locator = (By.CSS_SELECTOR, "button[aria-label='Review your application']")
+            submit_locator = (By.CSS_SELECTOR, "button[aria-label='Submit application']")
+            error_locator = (By.CLASS_NAME, "artdeco-inline-feedback__message")
             upload_resume_locator = (By.XPATH, '//span[text()="Upload resume"]')
             upload_cv_locator = (By.XPATH, '//span[text()="Upload cover letter"]')
-            # WebElement upload_locator = self.browser.find_element(By.NAME, "file")
             follow_locator = (By.CSS_SELECTOR, "label[for='follow-company-checkbox']")
 
             submitted = False
             loop = 0
             while loop < 2:
                 time.sleep(1)
-                # Upload resume
-                if is_present(upload_resume_locator):
-                    #upload_locator = self.browser.find_element(By.NAME, "file")
-                    try:
-                        resume_locator = self.browser.find_element(By.XPATH, "//*[contains(@id, 'jobs-document-upload-file-input-upload-resume')]")
+                try:
+                    # Upload resume
+                    if is_present(upload_resume_locator):
+                        resume_locator = self.browser.find_element(By.XPATH,
+                                                                   "//*[contains(@id, 'jobs-document-upload-file-input-upload-resume')]")
                         resume = self.uploads["Resume"]
                         resume_locator.send_keys(resume)
-                    except Exception as e:
-                        log.error(e)
-                        log.error("Resume upload failed")
-                        log.debug("Resume: " + resume)
-                        log.debug("Resume Locator: " + str(resume_locator))
-                # Upload cover letter if possible
-                if is_present(upload_cv_locator):
-                    cv = self.uploads["Cover Letter"]
-                    cv_locator = self.browser.find_element(By.XPATH, "//*[contains(@id, 'jobs-document-upload-file-input-upload-cover-letter')]")
-                    cv_locator.send_keys(cv)
 
-                    #time.sleep(random.uniform(4.5, 6.5))
-                elif len(self.get_elements("follow")) > 0:
-                    elements = self.get_elements("follow")
-                    for element in elements:
-                        button = self.wait.until(EC.element_to_be_clickable(element))
-                        button.click()
+                    # Upload cover letter if possible
+                    if is_present(upload_cv_locator):
+                        cv = self.uploads["Cover Letter"]
+                        cv_locator = self.browser.find_element(By.XPATH,
+                                                               "//*[contains(@id, 'jobs-document-upload-file-input-upload-cover-letter')]")
+                        cv_locator.send_keys(cv)
 
-                if len(self.get_elements("submit")) > 0:
-                    elements = self.get_elements("submit")
-                    for element in elements:
-                        button = self.wait.until(EC.element_to_be_clickable(element))
-                        button.click()
-                        log.info("Application Submitted")
-                        submitted = True
-                        break
+                    elif len(self.get_elements("follow")) > 0:
+                        elements = self.get_elements("follow")
+                        for element in elements:
+                            button = self.wait.until(EC.element_to_be_clickable(element))
+                            button.click()
 
-                elif len(self.get_elements("error")) > 0:
-                    elements = self.get_elements("error")
-                    if "application was sent" in self.browser.page_source:
-                        log.info("Application Submitted")
-                        submitted = True
-                        break
-                    elif len(elements) > 0:
-                        while len(elements) > 0:
-                            log.info("Please answer the questions, waiting 5 seconds...")
-                            time.sleep(5)
-                            elements = self.get_elements("error")
+                    if len(self.get_elements("submit")) > 0:
+                        elements = self.get_elements("submit")
+                        for element in elements:
+                            button = self.wait.until(EC.element_to_be_clickable(element))
+                            button.click()
+                            log.info("Application Submitted")
+                            submitted = True
+                            return submitted
 
-                            for element in elements:
-                                self.process_questions()
+                    elif len(self.get_elements("error")) > 0:
+                        elements = self.get_elements("error")
+                        if "application was sent" in self.browser.page_source:
+                            log.info("Application Submitted")
+                            submitted = True
+                            return submitted
+                        elif len(elements) > 0:
+                            log.info("Encountered questions or errors. Skipping this application.")
+                            return False
 
-                            if "application was sent" in self.browser.page_source:
-                                log.info("Application Submitted")
-                                submitted = True
-                                break
-                            elif is_present(self.locator["easy_apply_button"]):
-                                log.info("Skipping application")
-                                submitted = False
-                                break
-                        continue
-                        #add explicit wait
-                    
-                    else:
-                        log.info("Application not submitted")
-                        time.sleep(2)
-                        break
-                    # self.process_questions()
+                    elif len(self.get_elements("next")) > 0:
+                        elements = self.get_elements("next")
+                        for element in elements:
+                            button = self.wait.until(EC.element_to_be_clickable(element))
+                            button.click()
 
-                elif len(self.get_elements("next")) > 0:
-                    elements = self.get_elements("next")
-                    for element in elements:
-                        button = self.wait.until(EC.element_to_be_clickable(element))
-                        button.click()
+                    elif len(self.get_elements("review")) > 0:
+                        elements = self.get_elements("review")
+                        for element in elements:
+                            button = self.wait.until(EC.element_to_be_clickable(element))
+                            button.click()
 
-                elif len(self.get_elements("review")) > 0:
-                    elements = self.get_elements("review")
-                    for element in elements:
-                        button = self.wait.until(EC.element_to_be_clickable(element))
-                        button.click()
-
-                elif len(self.get_elements("follow")) > 0:
-                    elements = self.get_elements("follow")
-                    for element in elements:
-                        button = self.wait.until(EC.element_to_be_clickable(element))
-                        button.click()
+                    loop += 1
+                except Exception as e:
+                    log.error(f"Error during application process: {str(e)}")
+                    log.info("Skipping this application due to an error.")
+                    return False
 
         except Exception as e:
-            log.error(e)
-            log.error("cannot apply to this job")
-            pass
-            #raise (e)
+            log.error(f"Cannot apply to this job: {str(e)}")
+            log.info("Skipping this application due to an error.")
+            return False
 
         return submitted
     def process_questions(self):

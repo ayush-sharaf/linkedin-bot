@@ -50,3 +50,28 @@ are you comfortable commuting to this job's location?
 required
 yes
 no",Yes
+"have you completed the following level of education: master's degree?
+have you completed the following level of education: master's degree?
+required
+yes
+no
+please make a selection",Yes
+"how many years of work experience do you have with python (programming language)?
+enter a whole number between 0 and 99",1
+"how many years of work experience do you have with react.js?
+enter a whole number between 0 and 99",1
+"are you willing to undergo a background check, in accordance with local law/regulations?
+are you willing to undergo a background check, in accordance with local law/regulations?
+required
+yes
+no
+please make a selection",Yes
+"have you completed the following level of education: master's degree?
+have you completed the following level of education: master's degree?
+required
+yes
+no",Yes
+how many years of work experience do you have with python (programming language)?,1
+"website, blog or portfolio",user provided
+"your title
+please enter a valid answer",user provided
